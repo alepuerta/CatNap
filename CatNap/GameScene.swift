@@ -9,6 +9,13 @@
 import SpriteKit
 
 class GameScene: SKScene {
+    
+    struct PhysicsCategory {
+        static let None:    UInt32 = 0
+        static let Cat:     UInt32 = 0b1    // 1
+        static let Block:   UInt32 = 0b10   // 2
+        static let Bed:     UInt32 = 0b100  // 4
+    }
 
     var bedNode: SKSpriteNode!
     var catNode: SKSpriteNode!
@@ -34,5 +41,7 @@ class GameScene: SKScene {
         
         let catBodyTexture = SKTexture(imageNamed: "cat_body")
         catNode.physicsBody = SKPhysicsBody(texture: catBodyTexture, size: catNode.size)
+        
+        SKTAudio.sharedInstance().playBackgroundMusic("backgroundMusic.mp3")
     }
 }
