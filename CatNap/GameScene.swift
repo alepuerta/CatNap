@@ -9,37 +9,30 @@
 import SpriteKit
 
 class GameScene: SKScene {
-    override func didMoveToView(view: SKView) {
-        /* Setup your scene here */
-        let myLabel = SKLabelNode(fontNamed:"Chalkduster")
-        myLabel.text = "Hello, World!";
-        myLabel.fontSize = 45;
-        myLabel.position = CGPoint(x:CGRectGetMidX(self.frame), y:CGRectGetMidY(self.frame));
-        
-        self.addChild(myLabel)
-    }
+
+    var bedNode: SKSpriteNode!
+    var catNode: SKSpriteNode!
     
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-       /* Called when a touch begins */
+    override func didMoveToView(view: SKView) {
+        // Calculate playable margin
+        let maxAspectRatio: CGFloat = 16.0/9.0 // iPhone 5
+        let maxAspectRatioHeight = size.width / maxAspectRatio
+        let playableMargin: CGFloat = (size.height - maxAspectRatioHeight) / 2
+        let playableRect = CGRect(x: 0, y: playableMargin, width: size.height, height: size.height - playableMargin*2)
         
-        for touch in touches {
-            let location = touch.locationInNode(self)
-            
-            let sprite = SKSpriteNode(imageNamed:"Spaceship")
-            
-            sprite.xScale = 0.5
-            sprite.yScale = 0.5
-            sprite.position = location
-            
-            let action = SKAction.rotateByAngle(CGFloat(M_PI), duration:1)
-            
-            sprite.runAction(SKAction.repeatActionForever(action))
-            
-            self.addChild(sprite)
-        }
-    }
-   
-    override func update(currentTime: CFTimeInterval) {
-        /* Called before each frame is rendered */
+        physicsBody = SKPhysicsBody(edgeLoopFromRect: playableRect)
+        
+        bedNode = childNodeWithName("bed") as! SKSpriteNode
+        catNode = childNodeWithName("cat") as! SKSpriteNode
+        
+//        bedNode.setScale(1.5)
+//        catNode.setScale(1.5)
+        
+        let bedBodySize = CGSize(width: 40, height: 30)
+        bedNode.physicsBody = SKPhysicsBody(rectangleOfSize: bedBodySize)
+        bedNode.physicsBody!.dynamic = false
+        
+        let catBodyTexture = SKTexture(imageNamed: "cat_body")
+        catNode.physicsBody = SKPhysicsBody(texture: catBodyTexture, size: catNode.size)
     }
 }
