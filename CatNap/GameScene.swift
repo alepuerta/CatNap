@@ -82,9 +82,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let collision: UInt32 = contact.bodyA.categoryBitMask | contact.bodyB.categoryBitMask
         
         if collision == PhysicsCategory.Cat | PhysicsCategory.Bed {
-            print("SUCCESS")
+            win()
         } else if collision == PhysicsCategory.Cat | PhysicsCategory.Edge {
-            print("FAIL")
+            lose()
         }
     }
     
@@ -109,9 +109,56 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func newGame() {
-        view!.presentScene(GameScene(fileNamed: "GameScene"))
+        let scene = GameScene(fileNamed: "GameScene")
+        scene?.scaleMode = .AspectFill
+        view!.presentScene(scene)
+    }
+    
+    func lose() {
+        // 1
+        catNode.physicsBody!.contactTestBitMask = PhysicsCategory.None
+        catNode.texture = SKTexture(imageNamed: "cat_awake")
+        // 2
+        SKTAudio.sharedInstance().pauseBackgroundMusic()
+        runAction(SKAction.playSoundFileNamed("lose.mp3", waitForCompletion: false))
+        // 3
+        inGameMessage("Try again...")
+        // 4
+        runAction(SKAction.sequence([SKAction.waitForDuration(5), SKAction.runBlock(newGame)]))
+    }
+    
+    func win() {
+        // 1
+        catNode.physicsBody = nil
+        // 2
+        let curlY = bedNode.position.y + catNode.size.height/3
+        let curlPoint = CGPoint(x: bedNode.position.x, y: curlY)
+        // 3
+        catNode.runAction(SKAction.group([
+            SKAction.moveTo(curlPoint, duration: 0.66),
+            SKAction.rotateToAngle(0, duration: 0.5)
+            ]))
+        // 4
+        inGameMessage("Nice job!")
+        // 5
+        runAction(SKAction.sequence([SKAction.waitForDuration(5), SKAction.runBlock(newGame)]))
+        // 6
+        catNode.runAction(SKAction.animateWithTextures([
+            SKTexture(imageNamed: "cat_curlup1"),
+            SKTexture(imageNamed: "cat_curlup2"),
+            SKTexture(imageNamed: "cat_curlup3")], timePerFrame: 0.25))
+        // 7
+        SKTAudio.sharedInstance().pauseBackgroundMusic()
+        runAction(SKAction.playSoundFileNamed("win.mp3", waitForCompletion: false))
     }
 }
+
+
+
+
+
+
+
 
 
 
