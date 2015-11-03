@@ -86,6 +86,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         } else if collision == PhysicsCategory.Cat | PhysicsCategory.Edge {
             lose()
         }
+        
+        //
+        // MARK: Challenge 1 code
+        //
+        if collision == PhysicsCategory.Label | PhysicsCategory.Edge {
+            let labelNode = contact.bodyA.categoryBitMask == PhysicsCategory.Label ?
+                contact.bodyA.node as! SKLabelNode: contact.bodyB.node as! SKLabelNode
+            
+            if var userData = labelNode.userData {
+                // consequent bounce, keep counting
+                userData["bounceCount"] = (userData["bounceCount"] as! Int) + 1
+                if userData["bounceCount"] as! Int == 4 {
+                    labelNode.removeFromParent()
+                }
+            } else {
+                // first bounce, start counting
+                labelNode.userData = NSMutableDictionary(object: 1 as Int, forKey: "bounceCount")
+            }
+        }
     }
     
     func inGameMessage(text: String) {
@@ -105,7 +124,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // 3
         addChild(label)
         // 4
-        runAction(SKAction.sequence([SKAction.waitForDuration(3), SKAction.removeFromParent()]))
+        //runAction(SKAction.sequence([SKAction.waitForDuration(3), SKAction.removeFromParent()]))
     }
     
     func newGame() {
