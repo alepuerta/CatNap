@@ -22,6 +22,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var bedNode: SKSpriteNode!
     var catNode: SKSpriteNode!
     
+    var currentLevel: Int = 0
+    
+    class func level(levelNum: Int) -> GameScene? {
+        let scene = GameScene(fileNamed: "Level\(levelNum)")
+        scene?.currentLevel = levelNum
+        scene?.scaleMode = .AspectFill
+        return scene
+    }
+    
     override func didMoveToView(view: SKView) {
         // Calculate playable margin
         let maxAspectRatio: CGFloat = 16.0/9.0 // iPhone 5
@@ -128,9 +137,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func newGame() {
-        let scene = GameScene(fileNamed: "GameScene")
-        scene?.scaleMode = .AspectFill
-        view!.presentScene(scene)
+        view!.presentScene(GameScene.level(currentLevel))
     }
     
     func lose() {
