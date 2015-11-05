@@ -19,6 +19,7 @@
 		A99CE5E71BE813AF00C5268E /* SKTEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99CE5DB1BE813AF00C5268E /* SKTEffects.swift */; };
 		A99CE5E81BE813AF00C5268E /* SKTTimingFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99CE5DC1BE813AF00C5268E /* SKTTimingFunctions.swift */; };
 		A99CE5E91BE813AF00C5268E /* Vector3.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99CE5DD1BE813AF00C5268E /* Vector3.swift */; };
+		A9DEA03D1BEABB0400CB2896 /* Level2.sks in Resources */ = {isa = PBXBuildFile; fileRef = A9DEA03C1BEABB0400CB2896 /* Level2.sks */; };
 		A9F6B5B21BE18CDA000656F8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F6B5B11BE18CDA000656F8 /* AppDelegate.swift */; };
 		A9F6B5B41BE18CDB000656F8 /* Level1.sks in Resources */ = {isa = PBXBuildFile; fileRef = A9F6B5B31BE18CDB000656F8 /* Level1.sks */; };
 		A9F6B5B61BE18CDB000656F8 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F6B5B51BE18CDB000656F8 /* GameScene.swift */; };
@@ -71,6 +72,7 @@
 		A99CE5DB1BE813AF00C5268E /* SKTEffects.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKTEffects.swift; sourceTree = "<group>"; };
 		A99CE5DC1BE813AF00C5268E /* SKTTimingFunctions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKTTimingFunctions.swift; sourceTree = "<group>"; };
 		A99CE5DD1BE813AF00C5268E /* Vector3.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vector3.swift; sourceTree = "<group>"; };
+		A9DEA03C1BEABB0400CB2896 /* Level2.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Level2.sks; sourceTree = "<group>"; };
 		A9F6B5AE1BE18CDA000656F8 /* CatNap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CatNap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9F6B5B11BE18CDA000656F8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A9F6B5B31BE18CDB000656F8 /* Level1.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Level1.sks; sourceTree = "<group>"; };
@@ -170,6 +172,7 @@
 				A9F6B5E31BE18E9A000656F8 /* Art */,
 				A9F6B5B11BE18CDA000656F8 /* AppDelegate.swift */,
 				A9F6B5B31BE18CDB000656F8 /* Level1.sks */,
+				A9DEA03C1BEABB0400CB2896 /* Level2.sks */,
 				A9F6B5B51BE18CDB000656F8 /* GameScene.swift */,
 				A9F6B5B71BE18CDB000656F8 /* GameViewController.swift */,
 				A9F6B5B91BE18CDB000656F8 /* Main.storyboard */,
@@ -348,6 +351,7 @@
 				A9F6B5B41BE18CDB000656F8 /* Level1.sks in Resources */,
 				A9F6B5F71BE18EAC000656F8 /* lose.mp3 in Resources */,
 				A9F6B5FB1BE18EAC000656F8 /* BookTrailer.m4v in Resources */,
+				A9DEA03D1BEABB0400CB2896 /* Level2.sks in Resources */,
 				A9F6B5C01BE18CDB000656F8 /* LaunchScreen.storyboard in Resources */,
 				A9F6B5F91BE18EAC000656F8 /* win.mp3 in Resources */,
 				A9F6B5FA1BE18EAC000656F8 /* sprites.atlas in Resources */,
