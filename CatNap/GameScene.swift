@@ -72,13 +72,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         catNode.physicsBody!.contactTestBitMask = PhysicsCategory.Bed | PhysicsCategory.Edge
         
         addHook()
-        
-//        let rotationConstraint = SKConstraint.zRotation(SKRange(lowerLimit: -π/4, upperLimit: π/4))
-//        catNode.constraints = [rotationConstraint]
+
+        makeCompoundNode()
     }
     
     func sceneTouched(location: CGPoint) {
         let targetNode = self.nodeAtPoint(location)
+        print(targetNode)
+        if targetNode.parent?.name == "compoundNode" {
+            targetNode.parent!.removeFromParent()
+        }
         if targetNode.physicsBody == nil {
             return
         }
@@ -179,6 +182,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func lose() {
+        if (currentLevel > 1) {
+            currentLevel--
+        }
+        
         // 1
         catNode.physicsBody!.contactTestBitMask = PhysicsCategory.None
         catNode.texture = SKTexture(imageNamed: "cat_awake")
@@ -192,6 +199,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func win() {
+        
+        if (currentLevel < 3) {
+            currentLevel++
+        }
+        
         // 1
         catNode.physicsBody = nil
         // 2
@@ -277,6 +289,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         hookJoint = nil
     }
 
+    func makeCompoundNode() {
+        let compoundNode = SKNode()
+        compoundNode.zPosition = -1
+        compoundNode.name = "compoundNode"
+        
+        var bodies:[SKPhysicsBody] = [SKPhysicsBody]()
+        
+        enumerateChildNodesWithName("stone") { node, _ in
+            node.removeFromParent()
+            compoundNode.addChild(node)
+            
+            let body = SKPhysicsBody(rectangleOfSize: node.frame.size, center: node.position)
+            bodies.append(body)
+        }
+        
+        compoundNode.physicsBody = SKPhysicsBody(bodies: bodies)
+        
+        compoundNode.physicsBody!.collisionBitMask = PhysicsCategory.Edge | PhysicsCategory.Cat | PhysicsCategory.Block
+        addChild(compoundNode)
+    }
 }
 
 
