@@ -200,7 +200,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func win() {
         
-        if (currentLevel < 4) {
+        if (currentLevel < 7) {
             currentLevel++
         }
         
