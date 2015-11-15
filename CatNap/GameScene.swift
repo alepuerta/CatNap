@@ -8,18 +8,23 @@
 
 import SpriteKit
 
+protocol ImageCaptureDelegate {
+    func requestImagePicker()
+}
+
+struct PhysicsCategory {
+    static let None:    UInt32 = 0
+    static let Cat:     UInt32 = 0b1        // 1
+    static let Block:   UInt32 = 0b10       // 2
+    static let Bed:     UInt32 = 0b100      // 4
+    static let Edge:    UInt32 = 0b1000     // 8
+    static let Label:   UInt32 = 0b10000    // 16
+    static let Spring:  UInt32 = 0b100000   // 32
+    static let Hook:    UInt32 = 0b1000000  // 64
+}
+
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
-    struct PhysicsCategory {
-        static let None:    UInt32 = 0
-        static let Cat:     UInt32 = 0b1        // 1
-        static let Block:   UInt32 = 0b10       // 2
-        static let Bed:     UInt32 = 0b100      // 4
-        static let Edge:    UInt32 = 0b1000     // 8
-        static let Label:   UInt32 = 0b10000    // 16
-        static let Spring:  UInt32 = 0b100000   // 32
-        static let Hook:    UInt32 = 0b1000000  // 64
-    }
 
     var bedNode: SKSpriteNode!
     var catNode: SKSpriteNode!
@@ -38,7 +43,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         return scene
     }
     
+    var imageCaptureDelegate: ImageCaptureDelegate?
+    var photoChanged: Bool = false
+    
+    func changePhotoTexture(texture: SKTexture) {
+        let photoNode = childNodeWithName("//PictureNode") as! SKSpriteNode
+        photoNode.texture = texture
+        photoChanged = true
+    }
+    
     override func didMoveToView(view: SKView) {
+//        let backgroundDesat = SKSpriteNode(imageNamed: "background-desat")
+//        let label = SKLabelNode(fontNamed: "Zapfino")
+//        label.text = "Cat Nap"
+//        label.fontSize = 296
+//        
+//        let cropNode = SKCropNode()
+//        cropNode.addChild(backgroundDesat)
+//        cropNode.maskNode = label
+//        if let background = childNodeWithName("Background") {
+//            background.addChild(cropNode)
+//        }
+        
         // Calculate playable margin
         let maxAspectRatio: CGFloat = 16.0/9.0 // iPhone 5
         let maxAspectRatioHeight = size.width / maxAspectRatio
@@ -74,10 +100,56 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addHook()
 
         makeCompoundNode()
+
+        enumerateChildNodesWithName("PhotoFrameNode") { node, _ in
+            self.addPhotoToFrame(node as! SKSpriteNode)
+        }
+        
+//        let tvNode = OldTVNode(frame: CGRectMake(20, 500, 300, 300))
+//        addChild(tvNode)
+        let tvNodes = (children as [SKNode]).filter ({node in
+            return node.name == .Some("TVNode")
+        })
+        
+        for node in tvNodes {
+            let tvNode = OldTVNode(frame: node.frame)
+            self.addChild(tvNode)
+            node.removeFromParent()
+        }
+        
+        let shapeNodes = (children as [SKNode]).filter ({node in
+            return node.name == .Some("Shape")
+        })
+        for node in shapeNodes {
+            let shapeNode = makeWonkyBlockFromShapeNode(node as! SKShapeNode)
+            addChild(shapeNode)
+            node.removeFromParent()
+        }
     }
     
     func sceneTouched(location: CGPoint) {
-        let targetNode = self.nodeAtPoint(location)
+        var targetNode = self.nodeAtPoint(location)
+        
+        let nodes = self.nodesAtPoint(location) as [SKNode]
+        
+        for node in nodes {
+            if let nodeName = node.name {
+                if nodeName == "PhotoFrameNode" || nodeName == "TVNode" {
+                    // 1
+                    targetNode = node
+                    if nodeName == "TVNode" {
+                        break
+                    }
+                    // 2
+                    if !photoChanged {
+                        // 3
+                        imageCaptureDelegate?.requestImagePicker()
+                        return
+                    }
+                }
+            }
+        }
+        
         print(targetNode)
         if targetNode.parent?.name == "compoundNode" {
             targetNode.parent!.removeFromParent()
@@ -178,7 +250,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func newGame() {
-        view!.presentScene(GameScene.level(currentLevel))
+        if let newScene = GameScene.level(currentLevel) {
+            newScene.imageCaptureDelegate = imageCaptureDelegate
+            newScene.scaleMode = scaleMode
+            view!.presentScene(newScene)
+        }
     }
     
     func lose() {
@@ -308,6 +384,115 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         compoundNode.physicsBody!.collisionBitMask = PhysicsCategory.Edge | PhysicsCategory.Cat | PhysicsCategory.Block
         addChild(compoundNode)
+    }
+    
+    func createPhotoFrameAtPosition(position: CGPoint) {
+        // 1
+        let photoFrame = SKSpriteNode(imageNamed: "picture-frame")
+        photoFrame.name = "PhotoFrameNode"
+        photoFrame.position = position
+        
+        let pictureNode = SKSpriteNode(imageNamed: "picture")
+        pictureNode.name = "PictureNode"
+        
+        // 2
+        let maskNode = SKSpriteNode(imageNamed: "picture-frame-mask")
+        maskNode.name = "Mask"
+        
+        // 3
+        let cropNode = SKCropNode()
+        cropNode.addChild(pictureNode)
+        cropNode.maskNode = maskNode
+        photoFrame.addChild(cropNode)
+        addChild(photoFrame)
+        
+        photoFrame.physicsBody = SKPhysicsBody(circleOfRadius: ((photoFrame.size.width * 0.975) / 2.0))
+        photoFrame.physicsBody!.categoryBitMask = PhysicsCategory.Block
+        photoFrame.physicsBody!.collisionBitMask = PhysicsCategory.Block | PhysicsCategory.Cat | PhysicsCategory.Edge
+    }
+    
+    func addPhotoToFrame(photoFrame: SKSpriteNode) {
+        let pictureNode = SKSpriteNode(imageNamed: "picture")
+        pictureNode.name = "PictureNode"
+        
+        let maskNode = SKSpriteNode(imageNamed: "picture-frame-mask")
+        maskNode.name = "Mask"
+        
+        let cropNode = SKCropNode()
+        cropNode.addChild(pictureNode)
+        cropNode.maskNode = maskNode
+        photoFrame.addChild(cropNode)
+        
+        photoFrame.physicsBody = SKPhysicsBody(circleOfRadius: ((photoFrame.size.width * 0.975) / 2.0))
+        photoFrame.physicsBody!.categoryBitMask = PhysicsCategory.Block
+        photoFrame.physicsBody!.collisionBitMask = PhysicsCategory.Block | PhysicsCategory.Cat | PhysicsCategory.Edge
+    }
+    
+    func adjustedPoint(inputPoint: CGPoint, inputSize: CGSize)  -> CGPoint {
+        // 1
+        let width = inputSize.width * 0.15
+        let height = inputSize.height * 0.15
+        // 2
+        let xMove = width * CGFloat.random() - width / 2.0
+        let yMove = height * CGFloat.random() - height / 2.0
+        // 3
+        let move = CGPoint(x: xMove, y: yMove)
+        // 4
+        return inputPoint + move
+    }
+    
+    func makeWonkyBlockFromShapeNode(shapeNode: SKShapeNode) -> SKShapeNode {
+        // 1
+        let newShapeNode = SKShapeNode()
+        // 2
+        let originalRect = shapeNode.frame
+        // 3
+        var leftTop = CGPoint(x: CGRectGetMinX(originalRect), y: CGRectGetMaxY(originalRect))
+        var leftBottom = originalRect.origin
+        var rightBottom = CGPoint(x: CGRectGetMaxX(originalRect), y: CGRectGetMinY(originalRect))
+        var rightTop = CGPoint(x: CGRectGetMaxX(originalRect), y: CGRectGetMaxY(originalRect))
+        // 4
+        let size = originalRect.size
+        leftTop = adjustedPoint(leftTop, inputSize: size)
+        leftBottom = adjustedPoint(leftBottom, inputSize: size)
+        rightBottom = adjustedPoint(rightBottom, inputSize: size)
+        rightTop = adjustedPoint(rightTop, inputSize: size)
+        // 5
+        let bezierPath = CGPathCreateMutable()
+        CGPathMoveToPoint(bezierPath, nil, leftTop.x, leftTop.y)
+        CGPathAddLineToPoint(bezierPath, nil, leftBottom.x, leftBottom.y)
+        CGPathAddLineToPoint(bezierPath, nil, rightBottom.x, rightBottom.y)
+        CGPathAddLineToPoint(bezierPath, nil, rightTop.x, rightTop.y)
+        // 6
+        CGPathCloseSubpath(bezierPath)
+        // 7
+        newShapeNode.path = bezierPath
+        // 8
+        leftTop -= CGPoint(x: -2, y: -2)
+        leftBottom -= CGPoint(x: -2, y: -2)
+        rightBottom -= CGPoint(x: 2, y: 2)
+        rightTop -= CGPoint(x: 2, y: 2)
+        // 9
+        let physicsBodyPath = CGPathCreateMutable()
+        CGPathMoveToPoint(physicsBodyPath, nil, leftTop.x, leftTop.y)
+        CGPathAddLineToPoint(physicsBodyPath, nil, leftBottom.x, leftBottom.y)
+        CGPathAddLineToPoint(physicsBodyPath, nil, rightBottom.x, rightBottom.y)
+        CGPathAddLineToPoint(physicsBodyPath, nil, rightTop.x, rightTop.y)
+        // 10
+        CGPathCloseSubpath(physicsBodyPath)
+        // 11
+        newShapeNode.physicsBody = SKPhysicsBody(polygonFromPath: physicsBodyPath)
+        newShapeNode.physicsBody!.categoryBitMask = PhysicsCategory.Block
+        newShapeNode.physicsBody!.collisionBitMask = PhysicsCategory.Block | PhysicsCategory.Cat | PhysicsCategory.Edge
+        // 12
+        newShapeNode.lineWidth = 1.0
+        newShapeNode.fillColor = SKColor(red: 0.73, green: 0.73, blue: 1.0, alpha: 1.0)
+        newShapeNode.strokeColor = SKColor(red: 0.165, green: 0.165, blue: 0.0, alpha: 1.0)
+        newShapeNode.glowWidth = 1.0
+        newShapeNode.fillTexture = SKTexture(imageNamed: "wood_texture")
+        
+        // 13
+        return newShapeNode
     }
 }
 

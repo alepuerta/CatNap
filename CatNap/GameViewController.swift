@@ -9,13 +9,13 @@
 import UIKit
 import SpriteKit
 
-class GameViewController: UIViewController {
+class GameViewController: UIViewController, ImageCaptureDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
 //        if let scene = GameScene(fileNamed:"GameScene") {
-        if let scene = GameScene.level(1) {
+        if let scene = GameScene.level(6) {
             // Configure the view.
             let skView = self.view as! SKView
             skView.showsFPS = true
@@ -28,6 +28,8 @@ class GameViewController: UIViewController {
             /* Set the scale mode to scale to fit the window */
             scene.scaleMode = .AspectFill
             
+            scene.imageCaptureDelegate = self
+            
             skView.presentScene(scene)
         }
     }
@@ -37,11 +39,12 @@ class GameViewController: UIViewController {
     }
 
     override func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
-        if UIDevice.currentDevice().userInterfaceIdiom == .Phone {
-            return .AllButUpsideDown
-        } else {
-            return .All
-        }
+//        if UIDevice.currentDevice().userInterfaceIdiom == .Phone {
+//            return .AllButUpsideDown
+//        } else {
+//            return .All
+//        }
+        return UIInterfaceOrientationMask.Landscape
     }
 
     override func didReceiveMemoryWarning() {
@@ -52,4 +55,37 @@ class GameViewController: UIViewController {
     override func prefersStatusBarHidden() -> Bool {
         return true
     }
+    
+    func requestImagePicker() {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.delegate = self
+        presentViewController(imagePickerController, animated: true, completion: nil)
+    }
+    
+    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
+        //1
+        let image = info[UIImagePickerControllerOriginalImage] as! UIImage
+        //2
+        picker.dismissViewControllerAnimated(true, completion: {
+            //3
+            let imageTexture = SKTexture(image: image)
+            //4
+            let skView = self.view as! SKView
+            let gameScene = skView.scene as! GameScene
+            //place core image code here
+            //5
+            gameScene.changePhotoTexture(imageTexture)
+        })
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
